@@ -233,7 +233,7 @@ class OpenCVCamera(Camera):
         
     def _validate_fourcc(self) -> None:
         """Validates and sets the camera's fourcc."""
-        success = self.videocapture.set(cv2.CAP_PROP_FOURCC, self.fourcc)
+        success = self.videocapture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.fourcc))
         actual_fourcc = self.videocapture.get(cv2.CAP_PROP_FOURCC)
         if not success or actual_fourcc != self.fourcc:
             raise RuntimeError(f"{self} failed to set fourcc={self.fourcc} ({actual_fourcc=}).")
