@@ -115,6 +115,7 @@ class OpenCVCamera(Camera):
         self.fps = config.fps
         self.color_mode = config.color_mode
         self.warmup_s = config.warmup_s
+        self.fourcc = config.fourcc
 
         self.videocapture: cv2.VideoCapture | None = None
 
@@ -203,6 +204,11 @@ class OpenCVCamera(Camera):
             self.fps = self.videocapture.get(cv2.CAP_PROP_FPS)
         else:
             self._validate_fps()
+            
+        if self.fourcc is None:
+            self.fourcc = self.videocapture.get(cv2.CAP_PROP_FOURCC)
+        else:
+            self._validate_fourcc()
 
         default_width = int(round(self.videocapture.get(cv2.CAP_PROP_FRAME_WIDTH)))
         default_height = int(round(self.videocapture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
@@ -224,6 +230,13 @@ class OpenCVCamera(Camera):
         # Use math.isclose for robust float comparison
         if not success or not math.isclose(self.fps, actual_fps, rel_tol=1e-3):
             raise RuntimeError(f"{self} failed to set fps={self.fps} ({actual_fps=}).")
+        
+    def _validate_fourcc(self) -> None:
+        """Validates and sets the camera's fourcc."""
+        success = self.videocapture.set(cv2.CAP_PROP_FOURCC, self.fourcc)
+        actual_fourcc = self.videocapture.get(cv2.CAP_PROP_FOURCC)
+        if not success or actual_fourcc != self.fourcc:
+            raise RuntimeError(f"{self} failed to set fourcc={self.fourcc} ({actual_fourcc=}).")
 
     def _validate_width_and_height(self) -> None:
         """Validates and sets the camera's frame capture width and height."""
