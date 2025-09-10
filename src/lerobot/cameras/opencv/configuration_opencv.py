@@ -46,6 +46,7 @@ class OpenCVCameraConfig(CameraConfig):
         color_mode: Color mode for image output (RGB or BGR). Defaults to RGB.
         rotation: Image rotation setting (0°, 90°, 180°, or 270°). Defaults to no rotation.
         warmup_s: Time reading frames before returning from connect (in seconds)
+        fourcc: FourCC code for video format, must be 4 characters like 'MJPG' or 'YUYV', none to autodetect
 
     Note:
         - Only 3-channel color output (RGB/BGR) is currently supported.
@@ -55,7 +56,7 @@ class OpenCVCameraConfig(CameraConfig):
     color_mode: ColorMode = ColorMode.RGB
     rotation: Cv2Rotation = Cv2Rotation.NO_ROTATION
     warmup_s: int = 1
-    fourcc: str | None = "MJPG"
+    fourcc: str | None = None
 
     def __post_init__(self):
         if self.color_mode not in (ColorMode.RGB, ColorMode.BGR):
