@@ -206,7 +206,7 @@ class OpenCVCamera(Camera):
             self._validate_fps()
             
         if self.fourcc is None:
-            default_fourcc_code = self.videocapture.get(cv2.CAP_PROP_FOURCC)
+            default_fourcc_code = int(self.videocapture.get(cv2.CAP_PROP_FOURCC))
             self.fourcc = "".join([chr((default_fourcc_code >> 8*i) & 0xFF) for i in range(4)])
         else:
             self._validate_fourcc()
@@ -235,7 +235,7 @@ class OpenCVCamera(Camera):
     def _validate_fourcc(self) -> None:
         """Validates and sets the camera's fourcc."""
         success = self.videocapture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.fourcc))
-        actual_fourcc_code = self.videocapture.get(cv2.CAP_PROP_FOURCC)
+        actual_fourcc_code = int(self.videocapture.get(cv2.CAP_PROP_FOURCC))
         actual_fourcc = "".join([chr((actual_fourcc_code >> 8*i) & 0xFF) for i in range(4)])
         if not success or actual_fourcc != self.fourcc:
             assert len(self.fourcc) == 4, f"fourcc must be 4 characters, but {self.fourcc} is provided."
