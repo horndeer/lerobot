@@ -12,20 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from math import e
 import os
 from typing import Any
-
+from dataclasses import dataclass
 import numpy as np
 import rerun as rr
 
 
-def _init_rerun(session_name: str = "lerobot_control_loop") -> None:
-    """Initializes the Rerun SDK for visualizing the control loop."""
+@dataclass
+class RerunConfig:
+    session_name: str = "lerobot_control_loop"
+    port: int | None = None
+    address: str | None = None
+    blueprint_path: str | None = None
+
+
+def _init_rerun(cfg: RerunConfig) -> None:
+    """Initializes the Rerun SDK for visualizing the control loop.
+    If address and port are provided, it connects to the remote rerun server with gRPC.
+    Otherwise, it spawns a local viewer.
+    """
+    session_name = cfg.session_name
     batch_size = os.getenv("RERUN_FLUSH_NUM_BYTES", "8000")
     os.environ["RERUN_FLUSH_NUM_BYTES"] = batch_size
     rr.init(session_name)
-    memory_limit = os.getenv("LEROBOT_RERUN_MEMORY_LIMIT", "10%")
-    rr.spawn(memory_limit=memory_limit)
+    if cfg.address is not None and cfg.port is not None:
+        rr.connect_grpc(f"rerun+http://{cfg.address}:{cfg.port}/proxy")
+    else:
+        memory_limit = os.getenv("LEROBOT_RERUN_MEMORY_LIMIT", "10%")
+        rr.spawn(memory_limit=memory_limit)
+
 
 
 def log_rerun_data(observation: dict[str | Any], action: dict[str | Any]):
