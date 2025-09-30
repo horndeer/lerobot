@@ -76,6 +76,10 @@ class SO101FollowerEndEffector(SO101Follower):
 
         # Store the bounds for end-effector position
         self.end_effector_bounds = self.config.end_effector_bounds
+        
+        # Store the max degrees per step for each joint
+        self.max_deg_per_step = self.config.max_deg_per_step
+        
 
         self.current_ee_pos = None
         self.current_joint_pos = None
@@ -151,8 +155,15 @@ class SO101FollowerEndEffector(SO101Follower):
 
         # Compute inverse kinematics to get joint positions
         target_joint_values_in_degrees = self.kinematics.inverse_kinematics(
-            self.current_joint_pos, desired_ee_pos
+            self.current_joint_pos, desired_ee_pos, orientation_weight=0.1
         )
+
+        # garde fou
+        delta = target_joint_values_in_degrees[:len(self.max_deg_per_step)] - self.current_joint_pos[:len(self.max_deg_per_step)]
+        safe_delta = np.clip(delta, -self.max_deg_per_step, self.max_deg_per_step)
+        safe_target = self.current_joint_pos.copy()
+        safe_target[:len(self.max_deg_per_step)] += safe_delta
+        target_joint_values_in_degrees = safe_target
 
         # Create joint space action dictionary
         joint_action = {

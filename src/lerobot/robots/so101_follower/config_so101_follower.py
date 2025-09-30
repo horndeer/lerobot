@@ -40,6 +40,7 @@ class SO101FollowerConfig(RobotConfig):
     # Set to `True` for backward compatibility with previous policies/dataset
     use_degrees: bool = False
 
+    motors_acceleration: int | None = None
 
 @RobotConfig.register_subclass("so101_follower_end_effector")
 @dataclass
@@ -70,4 +71,8 @@ class SO101FollowerEndEffectorConfig(SO101FollowerConfig):
             "y": 0.02,
             "z": 0.02,
         }
+    )
+    
+    max_deg_per_step: list[float] = field(
+        default_factory=lambda: [3, 3, 3, 5, 10] # in join order, gripper not included
     )
