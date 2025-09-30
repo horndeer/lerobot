@@ -78,7 +78,7 @@ class SO101FollowerEndEffector(SO101Follower):
         self.end_effector_bounds = self.config.end_effector_bounds
         
         # Store the max degrees per step for each joint
-        self.max_deg_per_step = self.config.max_deg_per_step
+        self.max_deg_per_step = np.array(self.config.max_deg_per_step)
         
 
         self.current_ee_pos = None
