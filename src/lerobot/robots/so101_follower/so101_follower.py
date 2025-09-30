@@ -59,6 +59,9 @@ class SO101Follower(Robot):
             calibration=self.calibration,
         )
         self.cameras = make_cameras_from_configs(config.cameras)
+        
+        # Store the motors acceleration
+        self.motors_acceleration = self.config.motors_acceleration if self.config.motors_acceleration is not None else 254
 
     @property
     def _motors_ft(self) -> dict[str, type]:
@@ -148,7 +151,7 @@ class SO101Follower(Robot):
 
     def configure(self) -> None:
         with self.bus.torque_disabled():
-            self.bus.configure_motors()
+            self.bus.configure_motors(acceleration=self.motors_acceleration)
             for motor in self.bus.motors:
                 self.bus.write("Operating_Mode", motor, OperatingMode.POSITION.value)
                 # Set P_Coefficient to lower value to avoid shakiness (Default is 32)
