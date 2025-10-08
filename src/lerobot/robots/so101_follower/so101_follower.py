@@ -45,7 +45,11 @@ class SO101Follower(Robot):
     def __init__(self, config: SO101FollowerConfig):
         super().__init__(config)
         self.config = config
-        norm_mode_body = MotorNormMode.DEGREES if config.use_degrees else MotorNormMode.RANGE_M100_100
+        norm_mode_body = (
+            MotorNormMode.DEGREES
+            if config.use_degrees
+            else MotorNormMode.RANGE_M100_100
+        )
         self.bus = FeetechMotorsBus(
             port=self.config.port,
             motors={
@@ -59,9 +63,13 @@ class SO101Follower(Robot):
             calibration=self.calibration,
         )
         self.cameras = make_cameras_from_configs(config.cameras)
-        
+
         # Store the motors acceleration
-        self.motors_acceleration = self.config.motors_acceleration if self.config.motors_acceleration is not None else 254
+        self.motors_acceleration = (
+            self.config.motors_acceleration
+            if self.config.motors_acceleration is not None
+            else 254
+        )
 
     @property
     def _motors_ft(self) -> dict[str, type]:
@@ -70,7 +78,8 @@ class SO101Follower(Robot):
     @property
     def _cameras_ft(self) -> dict[str, tuple]:
         return {
-            cam: (self.config.cameras[cam].height, self.config.cameras[cam].width, 3) for cam in self.cameras
+            cam: (self.config.cameras[cam].height, self.config.cameras[cam].width, 3)
+            for cam in self.cameras
         }
 
     @cached_property
@@ -83,7 +92,9 @@ class SO101Follower(Robot):
 
     @property
     def is_connected(self) -> bool:
-        return self.bus.is_connected and all(cam.is_connected for cam in self.cameras.values())
+        return self.bus.is_connected and all(
+            cam.is_connected for cam in self.cameras.values()
+        )
 
     def connect(self, calibrate: bool = True) -> None:
         """
@@ -117,7 +128,9 @@ class SO101Follower(Robot):
                 f"Press ENTER to use provided calibration file associated with the id {self.id}, or type 'c' and press ENTER to run calibration: "
             )
             if user_input.strip().lower() != "c":
-                logger.info(f"Writing calibration file associated with the id {self.id} to the motors")
+                logger.info(
+                    f"Writing calibration file associated with the id {self.id} to the motors"
+                )
                 self.bus.write_calibration(self.calibration)
                 return
 
@@ -164,12 +177,18 @@ class SO101Follower(Robot):
                     self.bus.write(
                         "Max_Torque_Limit", motor, 500
                     )  # 50% of the max torque limit to avoid burnout
-                    self.bus.write("Protection_Current", motor, 250)  # 50% of max current to avoid burnout
-                    self.bus.write("Overload_Torque", motor, 25)  # 25% torque when overloaded
+                    self.bus.write(
+                        "Protection_Current", motor, 250
+                    )  # 50% of max current to avoid burnout
+                    self.bus.write(
+                        "Overload_Torque", motor, 25
+                    )  # 25% torque when overloaded
 
     def setup_motors(self) -> None:
         for motor in reversed(self.bus.motors):
-            input(f"Connect the controller board to the '{motor}' motor only and press enter.")
+            input(
+                f"Connect the controller board to the '{motor}' motor only and press enter."
+            )
             self.bus.setup_motor(motor)
             print(f"'{motor}' motor id set to {self.bus.motors[motor].id}")
 
@@ -209,14 +228,22 @@ class SO101Follower(Robot):
         if not self.is_connected:
             raise DeviceNotConnectedError(f"{self} is not connected.")
 
-        goal_pos = {key.removesuffix(".pos"): val for key, val in action.items() if key.endswith(".pos")}
+        goal_pos = {
+            key.removesuffix(".pos"): val
+            for key, val in action.items()
+            if key.endswith(".pos")
+        }
 
         # Cap goal position when too far away from present position.
         # /!\ Slower fps expected due to reading from the follower.
         if self.config.max_relative_target is not None:
             present_pos = self.bus.sync_read("Present_Position")
-            goal_present_pos = {key: (g_pos, present_pos[key]) for key, g_pos in goal_pos.items()}
-            goal_pos = ensure_safe_goal_position(goal_present_pos, self.config.max_relative_target)
+            goal_present_pos = {
+                key: (g_pos, present_pos[key]) for key, g_pos in goal_pos.items()
+            }
+            goal_pos = ensure_safe_goal_position(
+                goal_present_pos, self.config.max_relative_target
+            )
 
         # Send goal position to the arm
         self.bus.sync_write("Goal_Position", goal_pos)
