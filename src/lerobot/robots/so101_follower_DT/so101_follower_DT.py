@@ -115,10 +115,6 @@ class SO101FollowerDT(Robot):
         if self.is_connected:
             raise DeviceAlreadyConnectedError(f"{self} already connected")
 
-        # Initialize Rerun visualization
-        rr.init(f"{self.id} Digital Twin")
-        rr.spawn()
-
         # Load and display the URDF robot model
         if self.urdf_path.exists():
             print(f"Loading URDF from: {self.urdf_path}")
