@@ -40,12 +40,12 @@ class SO101FollowerDT(Robot):
         # Initialize joint positions (in degrees if use_degrees=True, otherwise in normalized range)
         # Default to middle positions
         self.joint_positions = {
-            "shoulder_pan": 0.0,
-            "shoulder_lift": 0.0,
-            "elbow_flex": 0.0,
-            "wrist_flex": 0.0,
-            "wrist_roll": 0.0,
-            "gripper": 0.0,  # Always in 0-100 range
+            "shoulder_pan": 0,
+            "shoulder_lift": 0,
+            "elbow_flex": 0,
+            "wrist_flex": 0,
+            "wrist_roll": 0,
+            "gripper": 0,  # Always in 0-100 range
         }
         
         self.joint_path = {"shoulder_pan": "base_link/shoulder_pan"}
@@ -129,6 +129,7 @@ class SO101FollowerDT(Robot):
             print(f"URDF file not found at: {self.urdf_path}")
             print("please provide a valid URDF file")
             exit()
+        
 
         # Mark as connected
         self._connected = True
@@ -197,7 +198,7 @@ class SO101FollowerDT(Robot):
                 if self.calibration and joint_name in self.calibration:
                     target_pos = np.clip(target_pos, self.calibration[joint_name].range_min, self.calibration[joint_name].range_max)
                 else:
-                    self.joint_positions[joint_name] = target_pos
+                    self.joint_positions[joint_name] = target_pos % 360.0
 
         # Control 3D transforms in Rerun (same pattern as sim_test.py)
         self._log_joint_transforms()
@@ -209,7 +210,7 @@ class SO101FollowerDT(Robot):
         """Log joint transforms to Rerun for URDF animation (same pattern as sim_test.py)."""
         # Convert degrees to radians for URDF joints if using degrees
         joint_positions = {
-            joint: ( pos - self.motor_steps / 2) / (self.motor_steps) * 2 * np.pi for joint, pos in self.joint_positions.items()
+            joint: pos / 360.0 * 2 * np.pi for joint, pos in self.joint_positions.items()
         }
 
 

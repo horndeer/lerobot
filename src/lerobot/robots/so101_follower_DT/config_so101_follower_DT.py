@@ -11,7 +11,9 @@ from ..config import RobotConfig
 class SO101FollowerDTConfig(RobotConfig):
     # Path to the URDF file for the digital twin
     urdf_path: str
-        
+    
+    # Set to `True` for backward compatibility with previous policies/dataset
+    use_degrees: bool = True
 
     # cameras (optional for simulation)
     cameras: dict[str, CameraConfig] = field(default_factory=dict)
